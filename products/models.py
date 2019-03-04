@@ -14,7 +14,7 @@ class Supplier(TimeStamp):
     website = models.CharField(max_length=255, default='', blank=True)
 
     def __str__(self):
-        return '<Supplier: {}, {}>'.format(self.id, self.name)
+        return f'<Supplier: {self.id}, {self.name}>'
 
 
 class Product(TimeStamp):
@@ -28,6 +28,7 @@ class Product(TimeStamp):
     wholesale_price = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     fees = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     total_cost = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
+    profit = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     roi = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True, verbose_name='ROI')
     buy_box = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     buy_box_avg90 = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True, verbose_name='Buy Box - 90 Days AVG')
@@ -59,7 +60,7 @@ class Product(TimeStamp):
     failed_analysis_reason = models.CharField(max_length=255, default='', blank=True)
 
     def __str__(self):
-        return '<Product: {}, {}, {}>'.format(self.id, self.asin or 'NO_ASIN', self.name)
+        return f'<Product: {self.id}, {self.asin or "NO_ASIN"}, {self.name}>'
 
 
 class InventoryUpload(TimeStamp):
@@ -93,7 +94,19 @@ class InventoryUpload(TimeStamp):
     failed_products = models.IntegerField(default=0, blank=True)
     email_on_completion = models.BooleanField(default=True, blank=True)
 
+    def identifier_field(self):
+        if self.identifier_type == InventoryUpload.ASIN:
+            return 'asin'
+
+        elif self.identifier_type == InventoryUpload.UPC:
+            return 'upc'
+
+        elif self.identifier_type == InventoryUpload.EIN:
+            return 'ein'
+
+        return ''
+
     def __str__(self):
-        return '<InventoryUpload: {}, {}, {}>'.format(self.id, self.file.filename, self.STATUS_CHOICES[self.status])
+        return f'<InventoryUpload: {self.id}, {self.file.name}, {self.STATUS_CHOICES[self.status]}>'
 
 
