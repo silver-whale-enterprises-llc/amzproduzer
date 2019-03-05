@@ -1,3 +1,5 @@
+import requests
+
 from products.models import InventoryUpload, Product
 from django.conf import settings
 import keepa
@@ -27,7 +29,19 @@ def process_inventory_upload(upload_id: int):
             product.save()
             continue
 
+        # TODO: get main categories ids from keepa before hand and store in db
+        root_category = product_data['rootCategory']
+        bsr = product_data['stats']['SALES'][0]  # or [-1] could be last item in list, check this.
+
         # request amz scout sales estimate
+        try:
+            params = {'domain': 'COM', 'category': root_category, 'rank': bsr}
+            response = requests.api.get(settings.AMZ_SCOUT_ESTIMATOR_ENDPOINT, params)
+        except Exception as e:
+            product.status = Product.FAILED
+            product.failed_analysis_reason = str(e)
+            product.save()
+            continue
 
         # update product
         # analyse product

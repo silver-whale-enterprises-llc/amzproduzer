@@ -59,39 +59,63 @@ class InventoryUploadAdmin(admin.ModelAdmin):
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
-        'supplier',
         'asin',
         'upc',
-        'ein',
-        'sku',
         'name',
-        'wholesale_units',
-        'wholesale_price',
-        'fees',
-        'total_cost',
         'profit',
         'roi',
+        'three_month_supply_cost',
+        'three_month_supply_amount',
+        'sales_estimate',
+        'review_count',
+        'sold_by_amazon',
+        'wholesale_price',
+        'total_cost',
         'buy_box',
         'buy_box_avg90',
         'buy_box_min',
         'buy_box_max',
-        'buy_box_min_date',
-        'buy_box_max_date',
-        'review_count',
+        'fba_sellers_count',
         'review_count_last30',
         'review_count_avg90',
         'sales_rank',
         'sales_rank_avg90',
-        'fba_sellers_count',
         'root_category',
-        'sales_estimate',
+        'supplier',
+    )
+    list_filter = ('supplier__name', 'status', 'sold_by_amazon')
+
+
+class LikedProductAdmin(admin.ModelAdmin):
+    def get_queryset(self, request):
+        return Product.objects.filter(status=Product.LIKED)
+
+    list_display = (
+        'supplier',
+        'asin',
+        'upc',
+        'name',
+        'profit',
+        'roi',
         'three_month_supply_cost',
         'three_month_supply_amount',
+        'sales_estimate',
+        'review_count',
         'sold_by_amazon',
-        'status',
-        'failed_analysis_reason',
+        'wholesale_price',
+        'total_cost',
+        'buy_box',
+        'buy_box_avg90',
+        'buy_box_min',
+        'buy_box_max',
+        'fba_sellers_count',
+        'review_count_last30',
+        'review_count_avg90',
+        'sales_rank',
+        'sales_rank_avg90',
+        'root_category',
     )
-    list_filter = ('supplier__name', 'files', 'roi', 'sales_rank', 'profit', 'sold_by_amazon')
+    list_filter = ('supplier__name', 'sold_by_amazon')
 
 
 admin.site.register(Supplier)
