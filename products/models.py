@@ -1,3 +1,4 @@
+from django.core.validators import validate_comma_separated_integer_list
 from django.db import models
 
 
@@ -108,5 +109,26 @@ class InventoryUpload(TimeStamp):
 
     def __str__(self):
         return f'<InventoryUpload: {self.id}, {self.file.name}, {self.STATUS_CHOICES[self.status]}>'
+
+
+class AmazonCategorySalesRank(models.Model):
+    name = models.CharField(max_length=255, default='')
+    max_allowed = models.IntegerField(null=False, blank=False, default=200000)
+    preferred = models.IntegerField(null=False, blank=False, default=100000)
+
+    def __str__(self):
+        return f'<AmazonCategorySalesRank: {self.id}, {self.name}, {self.preferred}>'
+
+
+class AmazonCategory(TimeStamp):
+    sales_rank = models.ForeignKey(AmazonCategorySalesRank, on_delete=models.CASCADE,
+                                   null=False, blank=False, related_name='amazon_ids')
+    name = models.CharField(max_length=255, default='')
+    category_id = models.BigIntegerField(null=False, blank=False)
+    products_count = models.IntegerField(default=0)
+    highest_rank = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f'<AmazonCategory: {self.id}, {self.name}, {self.products_count}>'
 
 
