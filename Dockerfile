@@ -21,7 +21,7 @@ ADD . /app
 
 # Using pipenv:
 RUN python3 -m pip install pipenv
-RUN pipenv install --ignore-pipfile
+RUN pipenv install --deploy --system --ignore-pipfile
 RUN echo 'alias migrate="python ./manage.py migrate"' >> ~/.bashrc
 RUN echo 'alias makemigrations="python ./manage.py makemigrations"' >> ~/.bashrc
 # CMD ["pipenv", "run", "python3", "-m", "amzproduzer"]

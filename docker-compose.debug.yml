@@ -3,6 +3,7 @@ version: "3"
 services:
   db:
     image: postgres
+    container_name: amzprod_db
   server:
     image: amzproduzer
     container_name: amzprod
