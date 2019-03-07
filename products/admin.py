@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.forms import ModelForm
 from django.http import HttpRequest
 
+from products.models import AmazonCategory
 from products.tasks import process_inventory_upload
 from products.utils import find_price_col_index, save_status, find_identifier_col_index, create_or_update_product
 from .models import Supplier, Product, InventoryUpload
@@ -86,38 +87,17 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('supplier__name', 'status', 'sold_by_amazon')
 
 
-class LikedProductAdmin(admin.ModelAdmin):
-    def get_queryset(self, request):
-        return Product.objects.filter(status=Product.LIKED)
-
+class AmazonCategoryAdmin(admin.ModelAdmin):
     list_display = (
-        'supplier',
-        'asin',
-        'upc',
         'name',
-        'profit',
-        'roi',
-        'three_month_supply_cost',
-        'three_month_supply_amount',
-        'sales_estimate',
-        'review_count',
-        'sold_by_amazon',
-        'wholesale_price',
-        'total_cost',
-        'buy_box',
-        'buy_box_avg90',
-        'buy_box_min',
-        'buy_box_max',
-        'fba_sellers_count',
-        'review_count_last30',
-        'review_count_avg90',
-        'sales_rank',
-        'sales_rank_avg90',
-        'root_category',
+        'category_id',
+        'products_count',
+        'highest_rank',
     )
-    list_filter = ('supplier__name', 'sold_by_amazon')
+    list_filter = ('sales_rank__name',)
 
 
 admin.site.register(Supplier)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(InventoryUpload, InventoryUploadAdmin)
+admin.site.register(AmazonCategory, AmazonCategoryAdmin)

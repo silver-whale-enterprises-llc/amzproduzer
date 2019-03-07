@@ -20,19 +20,39 @@ class Supplier(TimeStamp):
 
 class Product(TimeStamp):
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='products')
-    asin = models.CharField(max_length=15, verbose_name='ASIN', default='', blank=True)
     upc = models.CharField(max_length=15, verbose_name='UPC', default='', blank=True)
     ein = models.CharField(max_length=15, verbose_name='EIN', default='', blank=True)
     sku = models.CharField(max_length=15, verbose_name='SKU', default='', blank=True)
     name = models.CharField(max_length=255, default='', blank=True)
-    wholesale_units = models.IntegerField(default=0, blank=True)
-    wholesale_price = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
+    unit_price = models.IntegerField(default=0, blank=True)
+    set_price = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
+
+    PENDING, DISCARDED, HIGHLIGHTED, LIKED, FAILED = range(5)
+    STATUS_CHOICES = (
+        (PENDING, 'Pending Analysis'),  # New product on catalog, pending user review or system analysis
+        (DISCARDED, 'Thumbs Down :('),  # Product doesn't sell well or user won't sell it for some reason
+        (HIGHLIGHTED, 'Highlighted'),  # good preliminary review but saved for later in-depth analysis
+        (LIKED, 'Thumbs Up :)'),  # good prospect
+        (FAILED, 'Analysis Failed'),  # System failed to analyse this product
+    )
+    status = models.IntegerField(choices=STATUS_CHOICES, default=PENDING)
+    failed_analysis_reason = models.CharField(max_length=255, default='', blank=True)
+
+    def __str__(self):
+        return f'<Product: {self.id}, {self.asin or "NO_ASIN"}, {self.name}>'
+
+
+class AmazonProductListing(TimeStamp):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='amazon_listings')
+    asin = models.CharField(max_length=15, verbose_name='ASIN', default='', blank=True)
+    name = models.CharField(max_length=255, default='', blank=True)
     fees = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     total_cost = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     profit = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     roi = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True, verbose_name='ROI')
     buy_box = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
-    buy_box_avg90 = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True, verbose_name='Buy Box - 90 Days AVG')
+    buy_box_avg90 = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True,
+                                        verbose_name='Buy Box - 90 Days AVG')
     buy_box_min = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     buy_box_max = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     buy_box_min_date = models.DateField(null=True, blank=True)
@@ -48,20 +68,7 @@ class Product(TimeStamp):
     three_month_supply_cost = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     three_month_supply_amount = models.IntegerField(default=0, blank=True)
     sold_by_amazon = models.BooleanField(default=False)
-
-    PENDING, DISCARDED, HIGHLIGHTED, LIKED, FAILED = range(5)
-    STATUS_CHOICES = (
-        (PENDING, 'Pending Analysis'),  # New product on catalog, pending user review or system analysis
-        (DISCARDED, 'Thumbs Down :('),  # Product doesn't sell well or user won't sell it for some reason
-        (HIGHLIGHTED, 'Highlighted'),  # good preliminary review but saved for later in-depth analysis
-        (LIKED, 'Thumbs Up :)'),  # good prospect
-        (FAILED, 'Analysis Failed'),  # System failed to analyse this product
-    )
-    status = models.IntegerField(choices=STATUS_CHOICES, default=PENDING)
-    failed_analysis_reason = models.CharField(max_length=255, default='', blank=True)
-
-    def __str__(self):
-        return f'<Product: {self.id}, {self.asin or "NO_ASIN"}, {self.name}>'
+    isAddOn = models.BooleanField(default=False)
 
 
 class InventoryUpload(TimeStamp):
