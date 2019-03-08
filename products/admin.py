@@ -60,8 +60,17 @@ class InventoryUploadAdmin(admin.ModelAdmin):
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
-        'asin',
         'upc',
+        'name',
+        'supplier',
+        'status',
+    )
+    list_filter = ('supplier__name', 'status')
+
+
+class AmazonProductListingAdmin(admin.ModelAdmin):
+    list_display = (
+        'asin',
         'name',
         'profit',
         'roi',
@@ -84,7 +93,7 @@ class ProductAdmin(admin.ModelAdmin):
         'root_category',
         'supplier',
     )
-    list_filter = ('supplier__name', 'status', 'sold_by_amazon')
+    list_filter = ('sold_by_amazon',)
 
 
 class AmazonCategoryAdmin(admin.ModelAdmin):

@@ -42,7 +42,7 @@ def create_or_update_product(obj: InventoryUpload, line: list, price_col: int, i
     fields[obj.identifier_field()] = identifier
 
     product = Product.objects.filter(**fields)
-    fields['wholesale_price'] = Decimal(re.sub(r'\s\$', '', line[price_col]))
+    fields['unit_price'] = Decimal(re.sub(r'\s\$', '', line[price_col]))
     if product.exists():
         product.update(**fields)
     else:
