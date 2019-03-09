@@ -27,12 +27,10 @@ class Product(TimeStamp):
     unit_price = models.IntegerField(default=0, blank=True)
     set_price = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
 
-    PENDING, DISCARDED, HIGHLIGHTED, LIKED, FAILED = range(5)
+    PENDING, ANALYSED, FAILED = range(3)
     STATUS_CHOICES = (
         (PENDING, 'Pending Analysis'),  # New product on catalog, pending user review or system analysis
-        (DISCARDED, 'Thumbs Down :('),  # Product doesn't sell well or user won't sell it for some reason
-        (HIGHLIGHTED, 'Highlighted'),  # good preliminary review but saved for later in-depth analysis
-        (LIKED, 'Thumbs Up :)'),  # good prospect
+        (ANALYSED, 'Analysis Successful'),  # Product has been analysed
         (FAILED, 'Analysis Failed'),  # System failed to analyse this product
     )
     status = models.IntegerField(choices=STATUS_CHOICES, default=PENDING)
@@ -147,6 +145,16 @@ class AmazonProductListing(TimeStamp):
     three_month_supply_amount = models.IntegerField(default=0, blank=True)
     sold_by_amazon = models.BooleanField(default=False)
     isAddOn = models.BooleanField(default=False)
+    rating_current = models.IntegerField(default=0, blank=True)
+
+    DISCARDED, HIGHLIGHTED, RECOMMENDED, LIKED = range(4)
+    STATUS_CHOICES = (
+        (DISCARDED, 'Thumbs Down :('),  # Product doesn't sell well or user won't sell it for some reason
+        (HIGHLIGHTED, 'Highlighted'),  # good preliminary review but saved for later in-depth analysis
+        (RECOMMENDED, 'Recommended'),  # New product that after system analysis looks very promising
+        (LIKED, 'Thumbs Up :)'),  # good prospect
+    )
+    status = models.IntegerField(choices=STATUS_CHOICES, default=HIGHLIGHTED)
 
     def __str__(self):
         return f'<AmazonProductListing: {self.id}, {self.asin or "NO_ASIN"}, {self.name}>'
