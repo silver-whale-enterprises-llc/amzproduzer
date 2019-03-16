@@ -1,13 +1,6 @@
-from django.core.validators import validate_comma_separated_integer_list
 from django.db import models
-
-
-class TimeStamp(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
+from abstracts.models import TimeStamp
+from configurations.models import CategorySalesRank
 
 
 class Supplier(TimeStamp):
@@ -20,11 +13,12 @@ class Supplier(TimeStamp):
 
 class Product(TimeStamp):
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='products')
+    asin = models.CharField(max_length=15, verbose_name='ASIN', null=False, blank=False)
     upc = models.CharField(max_length=15, verbose_name='UPC', default='', blank=True)
     ein = models.CharField(max_length=15, verbose_name='EIN', default='', blank=True)
     sku = models.CharField(max_length=15, verbose_name='SKU', default='', blank=True)
     name = models.CharField(max_length=255, default='', blank=True)
-    unit_price = models.IntegerField(default=0, blank=True)
+    unit_price = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     set_price = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
 
     PENDING, ANALYSED, FAILED = range(3)
@@ -87,18 +81,9 @@ class InventoryUpload(TimeStamp):
         return f'<InventoryUpload: {self.id}, {self.file.name}, {self.STATUS_CHOICES[self.status]}>'
 
 
-class AmazonCategorySalesRank(models.Model):
-    name = models.CharField(max_length=255, default='')
-    max_allowed = models.IntegerField(null=False, blank=False, default=200000)
-    preferred = models.IntegerField(null=False, blank=False, default=100000)
-
-    def __str__(self):
-        return f'<AmazonCategorySalesRank: {self.id}, {self.name}, {self.preferred}>'
-
-
 class AmazonCategory(TimeStamp):
-    sales_rank = models.ForeignKey(AmazonCategorySalesRank, on_delete=models.CASCADE,
-                                   null=False, blank=False, related_name='amazon_ids')
+    sales_rank = models.ForeignKey(CategorySalesRank, on_delete=models.CASCADE,
+                                   null=True, blank=True, related_name='amazon_ids')
     name = models.CharField(max_length=255, default='')
     category_id = models.BigIntegerField(null=False, blank=False)
     products_count = models.IntegerField(default=0)
@@ -117,7 +102,7 @@ class AmazonProductListing(TimeStamp):
     profit = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     profit_median = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     profit_avg = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
-    roi = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True, verbose_name='ROI')
+    roi = models.DecimalField(max_digits=3, decimal_places=2, default=0, blank=True, verbose_name='ROI')
     buy_box = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     buy_box_median = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     buy_box_std_dev = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
@@ -139,13 +124,14 @@ class AmazonProductListing(TimeStamp):
     fba_sellers_count = models.IntegerField(default=0, blank=True)
     root_category = models.ForeignKey(AmazonCategory, null=True, blank=True, on_delete=models.PROTECT,
                                       related_name='listings')
-    sales_estimate_current = models.IntegerField(default=0, blank=True)
+    sales_estimate_current = models.IntegerField(default=0, blank=True, verbose_name='Sales /mo.')
     sales_estimate_avg = models.IntegerField(default=0, blank=True)
     three_month_supply_cost = models.DecimalField(max_digits=11, decimal_places=2, default=0, blank=True)
     three_month_supply_amount = models.IntegerField(default=0, blank=True)
     sold_by_amazon = models.BooleanField(default=False)
     isAddOn = models.BooleanField(default=False)
     rating_current = models.IntegerField(default=0, blank=True)
+    pack_units = models.IntegerField(default=1, blank=True)
 
     DISCARDED, HIGHLIGHTED, RECOMMENDED, LIKED = range(4)
     STATUS_CHOICES = (
@@ -155,6 +141,7 @@ class AmazonProductListing(TimeStamp):
         (LIKED, 'Thumbs Up :)'),  # good prospect
     )
     status = models.IntegerField(choices=STATUS_CHOICES, default=HIGHLIGHTED)
+    discard_reason = models.CharField(max_length=255, default='', blank=True)
 
     def __str__(self):
         return f'<AmazonProductListing: {self.id}, {self.asin or "NO_ASIN"}, {self.name}>'

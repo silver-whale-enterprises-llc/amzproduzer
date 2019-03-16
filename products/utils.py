@@ -39,10 +39,15 @@ def create_or_update_product(obj: InventoryUpload, line: list, price_col: int, i
     if not identifier:
         return
 
+    if obj.identifier_type == InventoryUpload.UPC:
+        upc_match = re.match(r'^[0-9]{6,14}$', identifier)
+        if not upc_match:
+            return
+
     fields[obj.identifier_field()] = identifier
 
     product = Product.objects.filter(**fields)
-    fields['unit_price'] = Decimal(re.sub(r'\s\$', '', line[price_col]))
+    fields['unit_price'] = round(float(re.sub(r'\s|\$', '', line[price_col])), 2)
     if product.exists():
         product.update(**fields)
     else:

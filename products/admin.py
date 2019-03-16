@@ -1,12 +1,10 @@
 import csv
-import re
-from decimal import Decimal
 
 from django.contrib import admin
 from django.forms import ModelForm
 from django.http import HttpRequest
 
-from products.models import AmazonCategory
+from products.models import AmazonCategory, AmazonProductListing
 from products.tasks import process_inventory_upload
 from products.utils import find_price_col_index, save_status, find_identifier_col_index, create_or_update_product
 from .models import Supplier, Product, InventoryUpload
@@ -64,6 +62,7 @@ class ProductAdmin(admin.ModelAdmin):
         'name',
         'supplier',
         'status',
+        'failed_analysis_reason'
     )
     list_filter = ('supplier__name', 'status')
 
@@ -76,10 +75,9 @@ class AmazonProductListingAdmin(admin.ModelAdmin):
         'roi',
         'three_month_supply_cost',
         'three_month_supply_amount',
-        'sales_estimate',
+        'sales_estimate_current',
         'review_count',
         'sold_by_amazon',
-        'wholesale_price',
         'total_cost',
         'buy_box',
         'buy_box_avg90',
@@ -91,7 +89,6 @@ class AmazonProductListingAdmin(admin.ModelAdmin):
         'sales_rank',
         'sales_rank_avg90',
         'root_category',
-        'supplier',
     )
     list_filter = ('sold_by_amazon',)
 
@@ -110,3 +107,4 @@ admin.site.register(Supplier)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(InventoryUpload, InventoryUploadAdmin)
 admin.site.register(AmazonCategory, AmazonCategoryAdmin)
+admin.site.register(AmazonProductListing, AmazonProductListingAdmin)
