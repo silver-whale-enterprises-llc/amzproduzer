@@ -1,16 +1,16 @@
+from __future__ import absolute_import, unicode_literals
 import datetime
 import random
 import re
 import urllib
+import keepa
+import requests
+from celery import shared_task
 from decimal import Decimal, getcontext
 from time import sleep
 from urllib.parse import quote
-
-import requests
-
 from products.models import InventoryUpload, Product, AmazonCategory, AmazonProductListing
 from django.conf import settings
-import keepa
 
 
 # ===========================================================
@@ -375,6 +375,7 @@ def update_or_create_amz_listing(listing: dict, product, upload):
     return amazon_listing
 
 
+@shared_task(ignore_result=True)
 def process_inventory_upload(upload_id: int):
     getcontext().prec = 2  # sets Decimal precision
 

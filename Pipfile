@@ -11,6 +11,11 @@ autopep8 = "*"
 django = "*"
 psycopg2-binary = "*"
 keepa = "*"
+celery = "*"
+django-celery-results = "*"
+gevent = "*"
+graphene = "*"
+graphene-django = "*"
 
 [requires]
 python_version = "3.7"

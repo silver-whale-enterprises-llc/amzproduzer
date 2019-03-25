@@ -11,11 +11,14 @@ from .models import Supplier, Product, InventoryUpload
 
 
 class InventoryUploadAdmin(admin.ModelAdmin):
-    list_display = ('id', 'file', 'supplier', 'total_products', 'status', 'failed_analysis_reason')
+    list_display = ('id', 'file', 'supplier', 'total_products', 'progress', 'status', 'failed_analysis_reason')
     fieldsets = [
         (None, {'fields': ['supplier', 'file']}),
         ('File Info', {'fields': ['price_col', 'identifier_col', 'identifier_type']}),
     ]
+
+    def progress(self, instance: InventoryUpload):
+        return instance.progress
 
     def save_model(self, request: HttpRequest, obj: InventoryUpload, form: ModelForm, change: bool):
         super().save_model(request, obj, form, change)
@@ -53,7 +56,7 @@ class InventoryUploadAdmin(admin.ModelAdmin):
         except Exception as e:
             save_status(obj, InventoryUpload.FAILED, str(e))
 
-        process_inventory_upload(obj.id)
+        process_inventory_upload.delay(obj.id)
 
 
 class ProductAdmin(admin.ModelAdmin):

@@ -77,6 +77,10 @@ class InventoryUpload(TimeStamp):
 
         return ''
 
+    @property
+    def progress(self):
+        return round((self.analysed_products + self.failed_products) / (self.total_products * 1.0) * 100)
+
     def __str__(self):
         return f'<InventoryUpload: {self.id}, {self.file.name}, {self.STATUS_CHOICES[self.status]}>'
 
@@ -145,5 +149,3 @@ class AmazonProductListing(TimeStamp):
 
     def __str__(self):
         return f'<AmazonProductListing: {self.id}, {self.asin or "NO_ASIN"}, {self.name}>'
-
-
